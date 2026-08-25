@@ -4,7 +4,7 @@
 /// async context exists.
 ///
 /// ```swift
-/// var migrator = SyncMigrator(store: UserDefaultsMigrationStore())
+/// var migrator = SyncMigrator(store: AppStorageMigrationStore())
 /// migrator.register(AddUserTable())
 /// migrator.register(SeedAdminUser())
 /// migrator.run()

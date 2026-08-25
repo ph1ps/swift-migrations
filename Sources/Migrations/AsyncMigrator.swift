@@ -5,7 +5,7 @@
 /// unrelated migration that merely finishes later.
 ///
 /// ```swift
-/// var migrator = AsyncMigrator(store: UserDefaultsMigrationStore())
+/// var migrator = AsyncMigrator(store: AppStorageMigrationStore())
 /// migrator.register(BackfillAvatars())
 /// let outcomes = await migrator.run()
 /// ```

@@ -326,12 +326,12 @@ func userDefaultsMigrationStorePersistsAcrossInstances() throws {
     defer { userDefaults.removePersistentDomain(forName: suiteName) }
 
     let id = MigrationID("AddUserTable")
-    let firstStore = UserDefaultsMigrationStore(userDefaults: userDefaults)
+    let firstStore = AppStorageMigrationStore(userDefaults: userDefaults)
     #expect(!firstStore.hasRun(id))
 
     firstStore.markAsRun(id)
 
-    let secondStore = UserDefaultsMigrationStore(userDefaults: userDefaults)
+    let secondStore = AppStorageMigrationStore(userDefaults: userDefaults)
     #expect(secondStore.hasRun(id))
     #expect(!secondStore.hasRun(MigrationID("SomeOtherMigration")))
 }

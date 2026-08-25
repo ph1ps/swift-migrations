@@ -59,7 +59,7 @@ public protocol MigrationStore: Sendable {
 ```
 A `UserDefaults`-backed implementation ships with the library:
 ```swift
-public final class UserDefaultsMigrationStore: MigrationStore {
+public final class AppStorageMigrationStore: MigrationStore {
   public init(userDefaults: UserDefaults = .standard)
 }
 ```
@@ -79,7 +79,7 @@ struct SeedAdminUser: SyncMigration {
   func migrate() throws { /* ... */ }
 }
 
-var migrator = SyncMigrator(store: UserDefaultsMigrationStore())
+var migrator = SyncMigrator(store: AppStorageMigrationStore())
 migrator.register(AddUserTable())
 migrator.register(SeedAdminUser())
 migrator.run() // blocking — safe to call from app init
@@ -93,7 +93,7 @@ struct BackfillAvatars: AsyncMigration {
   func migrate() async throws { /* ... */ }
 }
 
-var migrator = AsyncMigrator(store: UserDefaultsMigrationStore())
+var migrator = AsyncMigrator(store: AppStorageMigrationStore())
 migrator.register(BackfillAvatars())
 
 Task {
