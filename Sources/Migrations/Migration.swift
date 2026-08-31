@@ -27,9 +27,9 @@ public protocol Migration: Sendable {
 /// before the first screen appears.
 ///
 /// ```swift
-/// struct AddUserTable: SyncMigration {
-///     static let id = MigrationID("AddUserTable")
-///     func migrate() throws { /* ... */ }
+/// struct EnableNewAccountSystem: SyncMigration {
+///   static let id = MigrationID("EnableNewAccountSystem")
+///   func migrate() throws { /* ... */ }
 /// }
 /// ```
 public protocol SyncMigration: Migration {
@@ -56,8 +56,8 @@ extension SyncMigration {
 ///
 /// ```swift
 /// struct BackfillAvatars: AsyncMigration {
-///     static let id = MigrationID("BackfillAvatars")
-///     func migrate() async throws { /* ... */ }
+///   static let id = MigrationID("BackfillAvatars")
+///   func migrate() async throws { /* ... */ }
 /// }
 /// ```
 public protocol AsyncMigration: Migration {

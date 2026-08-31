@@ -5,8 +5,8 @@
 ///
 /// ```swift
 /// var migrator = SyncMigrator(store: AppStorageMigrationStore())
-/// migrator.register(AddUserTable())
-/// migrator.register(SeedAdminUser())
+/// migrator.register(EnableNewAccountSystem())
+/// migrator.register(ClearLegacySessionCache())
 /// migrator.run()
 /// ```
 public struct SyncMigrator {
