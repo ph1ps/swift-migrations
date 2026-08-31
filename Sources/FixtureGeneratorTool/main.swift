@@ -21,7 +21,7 @@ func emitChain(_ n: Int, _ kind: Kind) -> [String] {
   for i in 1..<n {
     let prev = i - 1
     lines.append(
-      "struct \(prefix)\(i): \(kind.protocolName) { static let id = MigrationID(\"\(prefix)\(i)\"); static var dependencies: [any \(kind.protocolName).Type] { [\(prefix)\(prev).self] }; \(kind.migrateBody) }"
+      "struct \(prefix)\(i): \(kind.protocolName) { static let id = MigrationID(\"\(prefix)\(i)\"); static let dependencies: [any \(kind.protocolName).Type] = [\(prefix)\(prev).self]; \(kind.migrateBody) }"
     )
   }
   return lines
@@ -41,7 +41,7 @@ func emitFanin(_ n: Int, _ kind: Kind) -> [String] {
   }
   let deps = (0..<(n - 1)).map { "\(prefix)\($0).self" }.joined(separator: ", ")
   lines.append(
-    "struct \(prefix)Root: \(kind.protocolName) { static let id = MigrationID(\"\(prefix)Root\"); static var dependencies: [any \(kind.protocolName).Type] { [\(deps)] }; \(kind.migrateBody) }"
+    "struct \(prefix)Root: \(kind.protocolName) { static let id = MigrationID(\"\(prefix)Root\"); static let dependencies: [any \(kind.protocolName).Type] = [\(deps)]; \(kind.migrateBody) }"
   )
   return lines
 }
@@ -54,7 +54,7 @@ func emitTree(_ n: Int, _ kind: Kind) -> [String] {
   for i in 1..<n {
     let parent = (i - 1) / 2
     lines.append(
-      "struct \(prefix)\(i): \(kind.protocolName) { static let id = MigrationID(\"\(prefix)\(i)\"); static var dependencies: [any \(kind.protocolName).Type] { [\(prefix)\(parent).self] }; \(kind.migrateBody) }"
+      "struct \(prefix)\(i): \(kind.protocolName) { static let id = MigrationID(\"\(prefix)\(i)\"); static let dependencies: [any \(kind.protocolName).Type] = [\(prefix)\(parent).self]; \(kind.migrateBody) }"
     )
   }
   return lines
