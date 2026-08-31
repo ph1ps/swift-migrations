@@ -5,17 +5,17 @@ import Foundation
 /// Pass a custom `UserDefaults` instance (a specific suite) for isolation
 /// between callers — there's no separate namespacing built in.
 public final class AppStorageMigrationStore: MigrationStore, @unchecked Sendable {
-    let userDefaults: UserDefaults
+  let userDefaults: UserDefaults
 
-    public init(userDefaults: UserDefaults = .standard) {
-        self.userDefaults = userDefaults
-    }
+  public init(userDefaults: UserDefaults = .standard) {
+    self.userDefaults = userDefaults
+  }
 
-    public func hasRun(_ id: MigrationID) -> Bool {
-        userDefaults.bool(forKey: id.rawValue)
-    }
+  public func hasRun(_ id: MigrationID) -> Bool {
+    userDefaults.bool(forKey: id.rawValue)
+  }
 
-    public func markAsRun(_ id: MigrationID) {
-        userDefaults.set(true, forKey: id.rawValue)
-    }
+  public func markAsRun(_ id: MigrationID) {
+    userDefaults.set(true, forKey: id.rawValue)
+  }
 }

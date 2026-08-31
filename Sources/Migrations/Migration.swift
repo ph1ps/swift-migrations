@@ -6,11 +6,11 @@
 /// ever register together — two migrations sharing an id is a programmer
 /// error that traps at registration time, not something to handle at runtime.
 public struct MigrationID: Hashable, Sendable {
-    public let rawValue: String
+  public let rawValue: String
 
-    public init(_ rawValue: String) {
-        self.rawValue = rawValue
-    }
+  public init(_ rawValue: String) {
+    self.rawValue = rawValue
+  }
 }
 
 /// The identity shared by `SyncMigration` and `AsyncMigration`.
@@ -18,7 +18,7 @@ public struct MigrationID: Hashable, Sendable {
 /// You don't conform to this directly — conform to `SyncMigration` or
 /// `AsyncMigration` instead.
 public protocol Migration: Sendable {
-    static var id: MigrationID { get }
+  static var id: MigrationID { get }
 }
 
 /// A migration that runs synchronously, executed by `SyncMigrator`.
@@ -33,20 +33,20 @@ public protocol Migration: Sendable {
 /// }
 /// ```
 public protocol SyncMigration: Migration {
-    /// Migrations that must succeed before this one runs. Empty by default.
-    ///
-    /// Declare as `static let` rather than a computed `static var { ... }`
-    /// if you register enough migrations for the array literal's repeated
-    /// allocation to matter.
-    static var dependencies: [any SyncMigration.Type] { get }
+  /// Migrations that must succeed before this one runs. Empty by default.
+  ///
+  /// Declare as `static let` rather than a computed `static var { ... }`
+  /// if you register enough migrations for the array literal's repeated
+  /// allocation to matter.
+  static var dependencies: [any SyncMigration.Type] { get }
 
-    func migrate() throws
+  func migrate() throws
 }
 
 extension SyncMigration {
-    public static var dependencies: [any SyncMigration.Type] {
-        []
-    }
+  public static var dependencies: [any SyncMigration.Type] {
+    []
+  }
 }
 
 /// A migration that runs asynchronously, executed by `AsyncMigrator`.
@@ -61,17 +61,17 @@ extension SyncMigration {
 /// }
 /// ```
 public protocol AsyncMigration: Migration {
-    /// Migrations that must succeed before this one runs. Empty by default.
-    ///
-    /// Can only reference other `AsyncMigration`s — a dependency on a
-    /// `SyncMigration` is a compile error, not a runtime one.
-    static var dependencies: [any AsyncMigration.Type] { get }
+  /// Migrations that must succeed before this one runs. Empty by default.
+  ///
+  /// Can only reference other `AsyncMigration`s — a dependency on a
+  /// `SyncMigration` is a compile error, not a runtime one.
+  static var dependencies: [any AsyncMigration.Type] { get }
 
-    func migrate() async throws
+  func migrate() async throws
 }
 
 extension AsyncMigration {
-    public static var dependencies: [any AsyncMigration.Type] {
-        []
-    }
+  public static var dependencies: [any AsyncMigration.Type] {
+    []
+  }
 }

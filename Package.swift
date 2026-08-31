@@ -38,10 +38,16 @@ let package = Package(
                 .product(name: "Benchmark", package: "benchmark"),
             ],
             path: "Benchmarks/MigrationsBenchmarks",
-            exclude: ["generate_fixtures.sh"],
             plugins: [
-                .plugin(name: "BenchmarkPlugin", package: "benchmark")
+                .plugin(name: "BenchmarkPlugin", package: "benchmark"),
+                .plugin(name: "GenerateBenchmarkFixtures"),
             ]
+        ),
+        .executableTarget(name: "FixtureGeneratorTool"),
+        .plugin(
+            name: "GenerateBenchmarkFixtures",
+            capability: .buildTool(),
+            dependencies: ["FixtureGeneratorTool"]
         ),
     ]
 )

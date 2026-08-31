@@ -8,6 +8,6 @@
 /// `AsyncMigrator` calls `markAsRun(_:)` from independently-running
 /// migrations.
 public protocol MigrationStore: Sendable {
-    func hasRun(_ id: MigrationID) -> Bool
-    func markAsRun(_ id: MigrationID)
+  func hasRun(_ id: MigrationID) -> Bool
+  func markAsRun(_ id: MigrationID)
 }

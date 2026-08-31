@@ -68,23 +68,23 @@ public final class AppStorageMigrationStore: MigrationStore {
 
 ### Sync migrations at app launch
 ```swift
-struct AddUserTable: SyncMigration {
-  static let id = MigrationID("AddUserTable")
+struct EnableNewAccountSystem: SyncMigration {
+  static let id = MigrationID("EnableNewAccountSystem")
   func migrate() throws { /* ... */ }
 }
 
-struct SeedAdminUser: SyncMigration {
-  static let id = MigrationID("SeedAdminUser")
-  static var dependencies: [any SyncMigration.Type] { [AddUserTable.self] }
+struct ClearLegacySessionCache: SyncMigration {
+  static let id = MigrationID("ClearLegacySessionCache")
+  static var dependencies: [any SyncMigration.Type] { [EnableNewAccountSystem.self] }
   func migrate() throws { /* ... */ }
 }
 
 var migrator = SyncMigrator(store: AppStorageMigrationStore())
-migrator.register(AddUserTable())
-migrator.register(SeedAdminUser())
+migrator.register(EnableNewAccountSystem())
+migrator.register(ClearLegacySessionCache())
 migrator.run() // blocking — safe to call from app init
 ```
-`SeedAdminUser` only runs after `AddUserTable` has succeeded, regardless of registration order.
+`ClearLegacySessionCache` only runs after `EnableNewAccountSystem` has succeeded, regardless of registration order — the old session cache isn't valid once the new account system is on.
 
 ### Async migrations in the background
 ```swift
