@@ -359,11 +359,15 @@ func asyncMigratorRespectsDependencyOrder() async throws {
 @Test
 func asyncMigratorIsIdempotent() async {
   let recorder = Recorder()
-  var runner = AsyncMigrator(store: InMemoryMigrationStore())
-  runner.register(BackfillAvatars(recorder: recorder))
+  let store = InMemoryMigrationStore()
 
-  await runner.run()
-  await runner.run()
+  var firstRunner = AsyncMigrator(store: store)
+  firstRunner.register(BackfillAvatars(recorder: recorder))
+  await firstRunner.run()
+
+  var secondRunner = AsyncMigrator(store: store)
+  secondRunner.register(BackfillAvatars(recorder: recorder))
+  await secondRunner.run()
 
   #expect(recorder.callCount(BackfillAvatars.id) == 1)
 }

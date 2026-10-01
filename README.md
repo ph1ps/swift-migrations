@@ -11,13 +11,13 @@ Some app migrations have to finish synchronously at launch, others can run in th
 
 The library comes with two protocols, one for synchronous and one for asynchronous migrations.
 ```swift
-public protocol SyncMigration: Sendable {
+public protocol SyncMigration {
   static var id: MigrationID { get }
   static var dependencies: [any SyncMigration.Type] { get }
   func migrate() throws
 }
 
-public protocol AsyncMigration: Sendable {
+public protocol AsyncMigration {
   static var id: MigrationID { get }
   static var dependencies: [any AsyncMigration.Type] { get }
   func migrate() async throws
@@ -33,20 +33,24 @@ public struct SyncMigrator {
   @discardableResult public func run() -> [MigrationID: MigrationOutcome]
 }
 
-public struct AsyncMigrator {
+public struct AsyncMigrator: ~Copyable {
   public init(store: some MigrationStore)
-  public mutating func register(_ migration: some AsyncMigration)
-  @discardableResult public func run() async -> [MigrationID: MigrationOutcome]
+  public mutating func register<Migration: AsyncMigration & SendableMetatype>(
+    _ migration: consuming sending Migration
+  )
+  @discardableResult public consuming func run() async -> [MigrationID: MigrationOutcome]
 }
 ```
 Both use [Kahn's algorithm](https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm). `SyncMigrator` computes the topological order up front and runs migrations one after another. `AsyncMigrator` runs the algorithm as migrations finish: a migration starts as soon as its last dependency completes, so independent migrations run concurrently.
+
+Migrations don't have to be `Sendable`. `AsyncMigrator.register` takes each migration as `sending`, so two migrations sharing mutable state can't be registered together, and `run()` consumes the migrator, so it can't run twice.
 
 - Parameters:
   - `store`: Records which migrations have already run.
   - `migration`: The migration to register.
 - Returns: The outcome of every registered migration, keyed by its `id`.
 
-A failing migration doesn't stop the run. Only migrations that depend on it are skipped. The possible outcomes are `.succeeded`, `.failed(any Error)`, `.skipped(.alreadyRun)` and `.skipped(.dependencyFailed(MigrationID))`. A failed migration isn't marked as run, so it's retried on the next `run()`.
+A failing migration doesn't stop the run. Only migrations that depend on it are skipped. The possible outcomes are `.succeeded`, `.failed(any Error)`, `.skipped(.alreadyRun)` and `.skipped(.dependencyFailed(MigrationID))`. A failed migration isn't marked as run, so it's retried on the next launch.
 
 > [!CAUTION]
 > Cycles, dependencies on unregistered migrations and duplicate `id`s are programmer errors. `run()` traps instead of throwing.
@@ -54,7 +58,7 @@ A failing migration doesn't stop the run. Only migrations that depend on it are 
 ### Store
 `MigrationStore` persists which migrations have already run. The library ships with `AppStorageMigrationStore`, which is backed by `UserDefaults`.
 ```swift
-public protocol MigrationStore: Sendable {
+public protocol MigrationStore {
   func hasRun(_ id: MigrationID) -> Bool
   func markAsRun(_ id: MigrationID)
 }
@@ -75,7 +79,7 @@ struct EnableNewAccountSystem: SyncMigration {
 
 struct ClearLegacySessionCache: SyncMigration {
   static let id = MigrationID("ClearLegacySessionCache")
-  static let dependencies: [any SyncMigration.Type] = [EnableNewAccountSystem.self]
+  static var dependencies: [any SyncMigration.Type] { [EnableNewAccountSystem.self] }
   func migrate() throws { /* ... */ }
 }
 
@@ -93,13 +97,15 @@ struct BackfillAvatars: AsyncMigration {
   func migrate() async throws { /* ... */ }
 }
 
-var migrator = AsyncMigrator(store: AppStorageMigrationStore())
-migrator.register(BackfillAvatars())
-
 Task {
+  var migrator = AsyncMigrator(store: AppStorageMigrationStore())
+  migrator.register(BackfillAvatars())
   let outcomes = await migrator.run()
   if case .failed(let error) = outcomes[BackfillAvatars.id] {
     // Log the error
   }
 }
 ```
+
+## License
+MIT. `Sources/Migrations/Disconnected.swift` is adapted from the Swift project's `Disconnected` ([SE-0538](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0538-disconnected.md)) and is licensed under Apache License v2.0 with Runtime Library Exception.

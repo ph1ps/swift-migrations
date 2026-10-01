@@ -9,7 +9,7 @@ struct NoOpStore: MigrationStore {
 let benchmarks: @Sendable () -> Void = {
   let config = Benchmark.Configuration(metrics: [.wallClock, .cpuTotal, .mallocCountTotal])
 
-  func syncBenchmark(_ name: String, _ migrations: [any SyncMigration]) {
+  func syncBenchmark(_ name: String, _ migrations: [any SyncMigration & Sendable]) {
     var builder = SyncMigrator(store: NoOpStore())
     for migration in migrations {
       builder.register(migration)
@@ -22,7 +22,7 @@ let benchmarks: @Sendable () -> Void = {
     }
   }
 
-  func asyncBenchmark(_ name: String, _ migrations: [any AsyncMigration]) {
+  func asyncBenchmark(_ name: String, _ migrations: [any AsyncMigration & Sendable]) {
     var builder = AsyncMigrator(store: NoOpStore())
     for migration in migrations {
       builder.register(migration)

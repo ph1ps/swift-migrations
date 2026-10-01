@@ -19,11 +19,15 @@ let package = Package(
         ),
     ],
     dependencies: [
+        .package(url: "https://github.com/apple/swift-collections", from: "1.7.0"),
         .package(url: "https://github.com/ordo-one/benchmark", .upToNextMajor(from: "1.4.0")),
     ],
     targets: [
         .target(
             name: "Migrations",
+            dependencies: [
+                .product(name: "BasicContainers", package: "swift-collections"),
+            ],
             swiftSettings: [.enableUpcomingFeature("NonisolatedNonsendingByDefault")]
         ),
         .testTarget(

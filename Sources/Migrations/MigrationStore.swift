@@ -4,10 +4,9 @@
 /// A `UserDefaults`-backed conformance ships with the library —
 /// `AppStorageMigrationStore`. Implement your own for other storage.
 ///
-/// Conformances must be safe to call from multiple concurrent tasks:
-/// `AsyncMigrator` calls `markAsRun(_:)` from independently-running
-/// migrations.
-public protocol MigrationStore: Sendable {
+/// Both migrators call the store from the isolation `run()` was called
+/// from, one call at a time, never from inside a running migration.
+public protocol MigrationStore {
   func hasRun(_ id: MigrationID) -> Bool
   func markAsRun(_ id: MigrationID)
 }

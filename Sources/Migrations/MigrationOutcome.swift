@@ -7,7 +7,7 @@ public enum MigrationOutcome: @unchecked Sendable {
   /// `migrate()` ran and returned without throwing.
   case succeeded
   /// `migrate()` threw. Not recorded in the `MigrationStore`, so it will
-  /// be attempted again on the next `run()`.
+  /// be attempted again the next time migrations run against that store.
   case failed(any Error)
   case skipped(SkipReason)
 }

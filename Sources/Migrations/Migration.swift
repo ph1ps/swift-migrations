@@ -24,14 +24,10 @@ public struct MigrationID: Hashable, Sendable {
 ///   func migrate() throws { /* ... */ }
 /// }
 /// ```
-public protocol SyncMigration: Sendable {
+public protocol SyncMigration {
   static var id: MigrationID { get }
 
   /// Migrations that must succeed before this one runs. Empty by default.
-  ///
-  /// Declare as `static let` rather than a computed `static var { ... }`
-  /// if you register enough migrations for the array literal's repeated
-  /// allocation to matter.
   static var dependencies: [any SyncMigration.Type] { get }
 
   func migrate() throws
@@ -54,7 +50,7 @@ extension SyncMigration {
 ///   func migrate() async throws { /* ... */ }
 /// }
 /// ```
-public protocol AsyncMigration: Sendable {
+public protocol AsyncMigration {
   static var id: MigrationID { get }
 
   /// Migrations that must succeed before this one runs. Empty by default.
