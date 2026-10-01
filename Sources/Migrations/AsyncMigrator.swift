@@ -10,6 +10,11 @@ import BasicContainers
 /// one. The graph itself is validated with the same O(V + E) topological
 /// sort `SyncMigrator` uses before anything runs.
 ///
+/// Run migrations once per process, from app-level code, not from a view's
+/// `.task`. A migration is only marked as run once it finishes, so two
+/// migrators running the same migration against the same storage at the
+/// same time will both run it.
+///
 /// ```swift
 /// var migrator = AsyncMigrator(store: AppStorageMigrationStore())
 /// migrator.register(BackfillAvatars())
