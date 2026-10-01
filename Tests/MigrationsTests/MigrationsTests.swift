@@ -381,6 +381,7 @@ func asyncMigratorReleasesDependentsOfAlreadyRunMigrations() async {
   await runner.run()
 
   #expect(recorder.callCount(BackfillAvatars.id) == 0)
+  #expect(recorder.callCount(BackfillDisplayNames.id) == 1)
   #expect(store.hasRun(BackfillDisplayNames.id))
 }
 

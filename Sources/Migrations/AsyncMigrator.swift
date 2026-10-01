@@ -98,7 +98,10 @@ public struct AsyncMigrator {
         }
       }
 
-      for index in remaining.indices where remaining[index] == 0 {
+      // Collected up front: releasing an already-run root resolves it
+      // synchronously, which can drop a later index to zero mid-loop.
+      let roots = remaining.indices.filter { remaining[$0] == 0 }
+      for index in roots {
         release(index)
       }
 
