@@ -105,7 +105,7 @@ public struct SyncMigrator {
     dependencies.append(contentsOf: repeatElement(0, count: migrations.count))
     for index in migrations.indices {
       for dependency in type(of: migrations[index]).dependencies {
-        guard let dependencyIndex = builder.index(of: dependency) else {
+        guard let dependencyIndex = builder.index(of: dependency.id) else {
           throw MigrationError.unregisteredDependency(
             dependency.id, dependedOnBy: builder.ids[index])
         }

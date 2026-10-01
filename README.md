@@ -11,12 +11,14 @@ Some app migrations have to finish synchronously at launch, others can run in th
 
 The library comes with two protocols, one for synchronous and one for asynchronous migrations.
 ```swift
-public protocol SyncMigration: Migration {
+public protocol SyncMigration: Sendable {
+  static var id: MigrationID { get }
   static var dependencies: [any SyncMigration.Type] { get }
   func migrate() throws
 }
 
-public protocol AsyncMigration: Migration {
+public protocol AsyncMigration: Sendable {
+  static var id: MigrationID { get }
   static var dependencies: [any AsyncMigration.Type] { get }
   func migrate() async throws
 }

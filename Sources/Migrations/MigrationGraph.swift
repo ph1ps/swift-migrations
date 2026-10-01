@@ -40,8 +40,8 @@ package struct MigrationGraph {
       self.indexByID = indexByID
     }
 
-    package func index(of migrationType: any Migration.Type) -> Int? {
-      indexByID[migrationType.id]
+    package func index(of id: MigrationID) -> Int? {
+      indexByID[id]
     }
   }
 

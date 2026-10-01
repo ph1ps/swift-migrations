@@ -13,14 +13,6 @@ public struct MigrationID: Hashable, Sendable {
   }
 }
 
-/// The identity shared by `SyncMigration` and `AsyncMigration`.
-///
-/// You don't conform to this directly — conform to `SyncMigration` or
-/// `AsyncMigration` instead.
-public protocol Migration: Sendable {
-  static var id: MigrationID { get }
-}
-
 /// A migration that runs synchronously, executed by `SyncMigrator`.
 ///
 /// Safe to run before any async context exists — from your app's `init`,
@@ -32,7 +24,9 @@ public protocol Migration: Sendable {
 ///   func migrate() throws { /* ... */ }
 /// }
 /// ```
-public protocol SyncMigration: Migration {
+public protocol SyncMigration: Sendable {
+  static var id: MigrationID { get }
+
   /// Migrations that must succeed before this one runs. Empty by default.
   ///
   /// Declare as `static let` rather than a computed `static var { ... }`
@@ -60,7 +54,9 @@ extension SyncMigration {
 ///   func migrate() async throws { /* ... */ }
 /// }
 /// ```
-public protocol AsyncMigration: Migration {
+public protocol AsyncMigration: Sendable {
+  static var id: MigrationID { get }
+
   /// Migrations that must succeed before this one runs. Empty by default.
   ///
   /// Can only reference other `AsyncMigration`s — a dependency on a
