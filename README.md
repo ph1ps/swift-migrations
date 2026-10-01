@@ -1,9 +1,6 @@
 # Migrations
 A dependency-graph migration runner for Swift.
 
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fph1ps%2Fswift-migrations%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/ph1ps/swift-migrations)
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fph1ps%2Fswift-migrations%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/ph1ps/swift-migrations)
-
 ## Rationale
 Some app migrations have to finish synchronously at launch, others can run in the background, and they often depend on each other. This library handles both cases.
 
@@ -41,9 +38,16 @@ public struct AsyncMigrator: ~Copyable {
   @discardableResult public consuming func run() async -> [MigrationID: MigrationOutcome]
 }
 ```
-Both use Kahn's algorithm ([Topological sorting of large networks](https://doi.org/10.1145/368996.369025), 1962). `SyncMigrator` computes the topological order up front and runs migrations one after another. `AsyncMigrator` runs the algorithm as migrations finish: a migration starts as soon as its last dependency completes, so independent migrations run concurrently.
+Both order migrations with Kahn's algorithm ([Topological sorting of large networks](https://doi.org/10.1145/368996.369025), 1962). For four migrations registered as `A`, `B`, `C`, `D`, where `C` depends on `A` and `B`:
 
-Migrations don't have to be `Sendable`. `AsyncMigrator.register` takes each migration as `sending`, so two migrations sharing mutable state can't be registered together, and `run()` consumes the migrator, so it can't run twice.
+| Migration | Depends on | `SyncMigrator` | `AsyncMigrator` |
+|---|---|---|---|
+| `A` | | 1st | starts immediately |
+| `B` | | 2nd | starts immediately |
+| `C` | `A`, `B` | 4th | starts once `A` and `B` have finished |
+| `D` | | 3rd | starts immediately |
+
+`SyncMigrator` runs one migration at a time. `AsyncMigrator` runs migrations concurrently: each one starts as soon as its last dependency has finished.
 
 - Parameters:
   - `store`: Records which migrations have already run.
@@ -109,6 +113,3 @@ Task {
   }
 }
 ```
-
-## License
-MIT. `Sources/Migrations/Disconnected.swift` is adapted from the Swift project's `Disconnected` ([SE-0538](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0538-disconnected.md)) and is licensed under Apache License v2.0 with Runtime Library Exception.
