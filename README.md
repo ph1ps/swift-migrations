@@ -39,7 +39,7 @@ public struct AsyncMigrator {
   @discardableResult public func run() async -> [MigrationID: MigrationOutcome]
 }
 ```
-`SyncMigrator` runs migrations one after another in dependency order. `AsyncMigrator` starts each migration as soon as its dependencies have finished, so independent migrations run concurrently.
+Both use [Kahn's algorithm](https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm). `SyncMigrator` computes the topological order up front and runs migrations one after another. `AsyncMigrator` runs the algorithm as migrations finish: a migration starts as soon as its last dependency completes, so independent migrations run concurrently.
 
 - Parameters:
   - `store`: Records which migrations have already run.

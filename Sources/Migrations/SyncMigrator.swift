@@ -1,5 +1,9 @@
 /// Runs `SyncMigration`s in dependency order, one at a time.
 ///
+/// The order is computed up front with Kahn's algorithm, a topological
+/// sort in O(V + E) for V migrations and E dependencies. Migrations that
+/// never reach zero unmet dependencies are in, or depend on, a cycle.
+///
 /// Fully synchronous — safe to call from your app's `init`, before any
 /// async context exists.
 ///

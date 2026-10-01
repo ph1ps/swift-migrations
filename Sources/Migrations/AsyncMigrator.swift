@@ -1,8 +1,12 @@
 /// Runs `AsyncMigration`s concurrently, respecting dependency order.
 ///
-/// Each migration is released the instant its own dependencies finish —
-/// independent migrations run in parallel, and one is never held up by an
-/// unrelated migration that merely finishes later.
+/// Uses Kahn's algorithm, run as migrations complete rather than up front:
+/// every migration tracks its count of unfinished dependencies, and when a
+/// migration finishes, each dependent's count is decremented. A dependent
+/// whose count reaches zero is added to a task group right away, so
+/// independent migrations run concurrently and none waits on an unrelated
+/// one. The graph itself is validated with the same O(V + E) topological
+/// sort `SyncMigrator` uses before anything runs.
 ///
 /// ```swift
 /// var migrator = AsyncMigrator(store: AppStorageMigrationStore())
