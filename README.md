@@ -40,14 +40,15 @@ public struct AsyncMigrator: ~Copyable {
 ```
 Both order migrations with Kahn's algorithm ([Topological sorting of large networks](https://doi.org/10.1145/368996.369025), 1962). For four migrations registered as `A`, `B`, `C`, `D`, where `C` depends on `A` and `B`:
 
-| Migration | Depends on | `SyncMigrator` | `AsyncMigrator` |
-|---|---|---|---|
-| `A` | | 1st | starts immediately |
-| `B` | | 2nd | starts immediately |
-| `C` | `A`, `B` | 4th | starts once `A` and `B` have finished |
-| `D` | | 3rd | starts immediately |
+```mermaid
+graph LR
+  A --> C
+  B --> C
+  D
+```
 
-`SyncMigrator` runs one migration at a time. `AsyncMigrator` runs migrations concurrently: each one starts as soon as its last dependency has finished.
+- `SyncMigrator` runs one migration at a time: `A`, `B`, `D`, `C`.
+- `AsyncMigrator` runs migrations concurrently: `A`, `B` and `D` start immediately, `C` starts once `A` and `B` have finished.
 
 - Parameters:
   - `store`: Records which migrations have already run.
