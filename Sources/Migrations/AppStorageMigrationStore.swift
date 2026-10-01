@@ -4,7 +4,7 @@ import Foundation
 ///
 /// Pass a custom `UserDefaults` instance (a specific suite) for isolation
 /// between callers — there's no separate namespacing built in.
-public final class AppStorageMigrationStore: MigrationStore, @unchecked Sendable {
+public final class AppStorageMigrationStore: MigrationStore {
   let userDefaults: UserDefaults
 
   public init(userDefaults: UserDefaults = .standard) {
