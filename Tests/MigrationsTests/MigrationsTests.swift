@@ -3,19 +3,14 @@ import Testing
 
 @testable import Migrations
 
-final class InMemoryMigrationStore: MigrationStore, @unchecked Sendable {
-  private let lock = NSLock()
-  private var ranMigrationIDs: Set<MigrationID> = []
+final class InMemoryMigrationStore: MigrationStore {
+  var ranMigrationIDs: Set<MigrationID> = []
 
   func hasRun(_ id: MigrationID) -> Bool {
-    lock.lock()
-    defer { lock.unlock() }
-    return ranMigrationIDs.contains(id)
+    ranMigrationIDs.contains(id)
   }
 
   func markAsRun(_ id: MigrationID) {
-    lock.lock()
-    defer { lock.unlock() }
     ranMigrationIDs.insert(id)
   }
 }

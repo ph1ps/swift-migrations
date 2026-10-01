@@ -3,7 +3,7 @@
 /// `SyncMigrator.run()` and `AsyncMigrator.run()` never throw for a failed
 /// migration — every registered migration gets its own outcome instead, so
 /// one failure never hides what happened to everything else.
-public enum MigrationOutcome: @unchecked Sendable {
+public enum MigrationOutcome: Sendable {
   /// `migrate()` ran and returned without throwing.
   case succeeded
   /// `migrate()` threw. Not recorded in the `MigrationStore`, so it will
