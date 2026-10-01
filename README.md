@@ -62,7 +62,7 @@ A failing migration doesn't stop the run. Only migrations that depend on it are 
 > Cycles, dependencies on unregistered migrations and duplicate `id`s are programmer errors. `run()` traps instead of throwing.
 
 > [!IMPORTANT]
-> Run your migrations once per process, from app-level code such as your `App`'s `init` or app delegate, not from a view's `.task`. Two migrators running the same migration against the same storage at the same time will both run it. This includes separate `AppStorageMigrationStore()` instances, since they share `UserDefaults.standard`, and an app and its extensions sharing an App Group.
+> A migration is only marked as run once it finishes, so two migrators running the same migration against the same storage at the same time will both run it. Start your migrations from a single owner that holds the task, not from something that can exist more than once, like a view's `.task` in a multi-window app. Storage can be shared without sharing a store instance: separate `AppStorageMigrationStore()` instances all use `UserDefaults.standard`, and an app and its extensions can share an App Group.
 
 ### Store
 `MigrationStore` persists which migrations have already run. The library ships with `AppStorageMigrationStore`, which stores each `id` as a `Bool` key in `UserDefaults`. The keys aren't prefixed, so pass a dedicated suite if they could clash with your own keys.
