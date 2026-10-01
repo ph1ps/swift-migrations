@@ -20,13 +20,13 @@ public protocol AsyncMigration {
   func migrate() async throws
 }
 ```
-A `SyncMigration` can run before any async context exists, e.g. in your app's `init`. An `AsyncMigration` can do async work. Dependencies are checked at compile time: a migration can only depend on migrations of the same kind.
+A `SyncMigration` can run before any async context exists, e.g. in your app's `init`. An `AsyncMigration` can do async work. `dependencies` defaults to empty. Dependencies are checked at compile time: a migration can only depend on migrations of the same kind.
 
 Migrations are executed by one of two runners:
 ```swift
 public struct SyncMigrator {
   public init(store: some MigrationStore)
-  public mutating func register(_ migration: some SyncMigration)
+  public mutating func register<Migration: SyncMigration>(_ migration: Migration)
   @discardableResult public func run() -> [MigrationID: MigrationOutcome]
 }
 
@@ -38,6 +38,12 @@ public struct AsyncMigrator: ~Copyable {
   @discardableResult public consuming func run() async -> [MigrationID: MigrationOutcome]
 }
 ```
+
+- Parameters:
+  - `store`: Records which migrations have already run.
+  - `migration`: The migration to register. Registration order doesn't matter.
+- Returns: The outcome of every registered migration, keyed by its `id`.
+
 Both order migrations with Kahn's algorithm ([Topological sorting of large networks](https://doi.org/10.1145/368996.369025), 1962). For four migrations registered as `A`, `B`, `C`, `D`, where `C` depends on `A` and `B`:
 
 ```mermaid
@@ -50,11 +56,6 @@ graph LR
 - `SyncMigrator` runs one migration at a time: `A`, `B`, `D`, `C`.
 - `AsyncMigrator` runs migrations concurrently: `A`, `B` and `D` start immediately, `C` starts once `A` and `B` have finished.
 
-- Parameters:
-  - `store`: Records which migrations have already run.
-  - `migration`: The migration to register.
-- Returns: The outcome of every registered migration, keyed by its `id`.
-
 A failing migration doesn't stop the run. Only migrations that depend on it are skipped. The possible outcomes are `.succeeded`, `.failed(any Error)`, `.skipped(.alreadyRun)` and `.skipped(.dependencyFailed(MigrationID))`. A failed migration isn't marked as run, so it's retried on the next launch.
 
 > [!CAUTION]
@@ -64,7 +65,7 @@ A failing migration doesn't stop the run. Only migrations that depend on it are 
 > Run your migrations once per process, from app-level code such as your `App`'s `init` or app delegate, not from a view's `.task`. Two migrators running the same migration against the same storage at the same time will both run it. This includes separate `AppStorageMigrationStore()` instances, since they share `UserDefaults.standard`, and an app and its extensions sharing an App Group.
 
 ### Store
-`MigrationStore` persists which migrations have already run. The library ships with `AppStorageMigrationStore`, which is backed by `UserDefaults`.
+`MigrationStore` persists which migrations have already run. The library ships with `AppStorageMigrationStore`, which stores each `id` as a `Bool` key in `UserDefaults`. The keys aren't prefixed, so pass a dedicated suite if they could clash with your own keys.
 ```swift
 public protocol MigrationStore {
   func hasRun(_ id: MigrationID) -> Bool
