@@ -15,6 +15,7 @@
 /// ```
 public struct SyncMigrator {
   let store: any MigrationStore
+  var types: [any SyncMigration.Type] = []
   var migrations: [any SyncMigration] = []
 
   /// - Parameter store: where completed migrations are recorded, so they
@@ -25,7 +26,8 @@ public struct SyncMigrator {
 
   /// Adds a migration to run on the next `run()`. Order doesn't matter —
   /// `run()` sequences by `dependencies`, not by registration order.
-  public mutating func register(_ migration: some SyncMigration) {
+  public mutating func register<Migration: SyncMigration>(_ migration: Migration) {
+    types.append(Migration.self)
     migrations.append(migration)
   }
 
@@ -98,17 +100,17 @@ public struct SyncMigrator {
 
   package func dependencyGraph() throws -> MigrationGraph {
     var ids: [MigrationID] = []
-    ids.reserveCapacity(migrations.count)
-    for migration in migrations {
-      ids.append(type(of: migration).id)
+    ids.reserveCapacity(types.count)
+    for type in types {
+      ids.append(type.id)
     }
     let builder = try MigrationGraph.Builder(ids: ids)
 
     var dependencies: [Int] = []
-    dependencies.reserveCapacity(2 * migrations.count)
-    dependencies.append(contentsOf: repeatElement(0, count: migrations.count))
-    for index in migrations.indices {
-      for dependency in type(of: migrations[index]).dependencies {
+    dependencies.reserveCapacity(2 * types.count)
+    dependencies.append(contentsOf: repeatElement(0, count: types.count))
+    for index in types.indices {
+      for dependency in types[index].dependencies {
         guard let dependencyIndex = builder.index(of: dependency.id) else {
           throw MigrationError.unregisteredDependency(
             dependency.id, dependedOnBy: builder.ids[index])
