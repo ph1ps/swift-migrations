@@ -41,7 +41,7 @@ public struct AsyncMigrator: ~Copyable {
   @discardableResult public consuming func run() async -> [MigrationID: MigrationOutcome]
 }
 ```
-Both use [Kahn's algorithm](https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm). `SyncMigrator` computes the topological order up front and runs migrations one after another. `AsyncMigrator` runs the algorithm as migrations finish: a migration starts as soon as its last dependency completes, so independent migrations run concurrently.
+Both use Kahn's algorithm ([Topological sorting of large networks](https://doi.org/10.1145/368996.369025), 1962). `SyncMigrator` computes the topological order up front and runs migrations one after another. `AsyncMigrator` runs the algorithm as migrations finish: a migration starts as soon as its last dependency completes, so independent migrations run concurrently.
 
 Migrations don't have to be `Sendable`. `AsyncMigrator.register` takes each migration as `sending`, so two migrations sharing mutable state can't be registered together, and `run()` consumes the migrator, so it can't run twice.
 
